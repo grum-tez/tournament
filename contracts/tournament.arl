@@ -1,0 +1,66 @@
+
+archetype tournament
+
+variable s : string = ""
+variable next_player_id : int = 1
+
+asset players {
+  player_id: int;
+  discord_username: string;
+}
+
+asset matches {
+  match_id: int;
+  player1_id: int;
+  player2_id: int;
+  player1_claims_win: option<bool> = none;
+  player2_claims_win: option<bool> = none;
+  final_winner_id: int = 0;
+}
+
+entry exec() {
+  s := "Hello Archetype World!"
+}
+
+entry signup(s_discord_username: string) {
+  players.add({
+    player_id = next_player_id; 
+    discord_username = s_discord_username    
+    });
+
+  next_player_id += 1
+}
+
+entry createTournament() {
+  require {
+    r1_eight_players: players.count() = 8
+  }
+  effect {
+    const matchPattern: list<list<int>> = [ 
+      [1;2];
+      [3;4];
+      [5;6];
+      [7;8];
+      [4;8];
+      [3;2]; 
+      [5;7]; 
+      [1;6];
+      [5;6];
+      [6;3];
+      [7;1];
+      [2;4]
+    ];
+  var next_match_id = 1;
+  for pair in matchPattern do
+    const p1_id ?= nth(pair, 0);
+    const p2_id ?= nth(pair, 1); 
+    matches.add({
+      match_id = next_match_id;
+      player1_id = p1_id;
+      player2_id = p2_id
+    });
+  next_match_id += 1;
+  done;
+  }
+
+}
